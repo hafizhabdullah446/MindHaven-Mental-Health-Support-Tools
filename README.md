@@ -8,18 +8,6 @@ This is a static, offline demo that showcases core flows:
 - Simple counselor dashboard with anonymized notifications and a toy heatmap
 - Local-only storage (no backend)
 
-## How to Run
-1. Put `index.html` and `README.md` into a folder (e.g., `mindhaven-prototype`).
-2. Double-click `index.html` to open it in Chrome/Edge/Firefox.
-3. Accept the consent notice, then try:
-   - Complete the assessment and view results.
-   - Open the chat and type phrases like “I feel stressed”, “hopeless”.
-   - Check the dashboard for notifications.
-
-## Customize Quickly
-- Change the app name, colors, or text in `index.html` (search for “MindHaven”).
-- Replace demo phrases / coping tips in the JavaScript section (`planFor()` and `crisisWords`).
-- Replace the demo alerts with real actions later.
 
 ## MVP Roadmap
 1. **Auth & Roles:** Student/counselor login (Firebase Authentication).

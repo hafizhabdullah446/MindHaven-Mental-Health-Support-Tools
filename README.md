@@ -4,7 +4,7 @@
 This is a static, offline demo that showcases core flows:
 - GAD-7 self-assessment with real-time scoring
 - Suggested coping plan
-- “Hani” supportive chatbot with basic rule logic + crisis detection
+- “Balan” supportive chatbot with basic rule logic + crisis detection
 - Simple counselor dashboard with anonymized notifications and a toy heatmap
 - Local-only storage (no backend)
 

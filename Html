@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MindHaven — Student Mental Health Prototype</title>
+  <style>
+    :root{
+      --bg:#0c1116; --card:#121923; --text:#e6ebf0; --muted:#9fb1c7; --accent:#7cc7ff; --danger:#ff6b6b; --ok:#2ecc71; --warn:#f1c40f;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg, #0c1116, #0b0f14);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.45;}
+    header{position:sticky; top:0; backdrop-filter:saturate(140%) blur(10px); background:rgba(12,17,22,.7); border-bottom:1px solid #1f2a37; z-index:10}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .row{display:flex; gap:16px; flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand .logo{width:36px;height:36px;border-radius:12px;background:radial-gradient(circle at 30% 30%, #7cc7ff, #457b9d); box-shadow:var(--shadow)}
+    nav{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+    nav a{color:var(--muted); text-decoration:none; padding:10px 12px; border-radius:12px}
+    nav a:hover{background:#192534; color:var(--text)}
+    main{padding:22px 0 60px}
+    h1{font-size:28px; margin:10px 0 6px}
+    .tag{font-size:12px; color:#b8c7da; background:#13202e; border:1px solid #1f3346; padding:4px 8px; border-radius:999px}
+    .grid{display:grid; gap:16px}
+    .g-2{grid-template-columns:repeat(2,1fr)}
+    .g-3{grid-template-columns:repeat(3,1fr)}
+    .card{background:var(--card); border:1px solid #1f2a37; border-radius:var(--radius); box-shadow:var(--shadow); padding:18px}
+    .card h2{margin:0 0 10px; font-size:20px}
+    .muted{color:var(--muted)}
+    button, .btn{cursor:pointer; border:none; background:#17324a; color:var(--text); padding:10px 14px; border-radius:12px}
+    button:hover, .btn:hover{filter:brightness(1.1)}
+    .btn-accent{background:linear-gradient(135deg, #5fb3ff, #4aa3ff); color:#06121d}
+    .btn-danger{background:#4b1f25; color:#ffd7d7; border:1px solid #5e2b32}
+    .btn-ok{background:#173a2a; color:#e8fff1; border:1px solid #1f5a3f}
+    .pill{display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid #2a3b4f; background:#111a25}
+    .danger{color:#ffd7d7; background:#3a0f15; border-color:#5e2b32}
+    .warn{color:#fff4d6; background:#3a2e12; border-color:#5e4a19}
+    .ok{color:#e8fff1; background:#1a2d21; border-color:#27513e}
+    .q{display:flex; flex-direction:column; gap:10px; margin:12px 0; padding:12px; background:#101923; border-radius:14px; border:1px solid #1c2a3a}
+    .q label{display:flex; align-items:center; gap:10px; padding:8px 10px; background:#0e1721; border:1px solid #18283a; border-radius:12px}
+    .q label:hover{background:#12202d}
+    .radio{accent-color:#5fb3ff}
+    .flex-between{display:flex; align-items:center; justify-content:space-between}
+    .right{margin-left:auto}
+    .footer{opacity:.7; font-size:12px; margin-top:10px}
+    /* Chat */
+    .chat{height:280px; overflow:auto; padding:12px; background:#0e1620; border:1px solid #1b2a3a; border-radius:14px}
+    .msg{display:flex; gap:8px; margin:10px 0; align-items:flex-end}
+    .msg .bubble{max-width:70%; padding:10px 12px; border-radius:14px; border:1px solid #2a3b4f}
+    .me .bubble{margin-left:auto; background:#112235}
+    .bot .bubble{background:#0d1a27}
+    .tiny{font-size:11px; color:#8ea3ba}
+    .crisis{display:none; padding:12px; border-radius:12px; border:1px solid #5e2b32; background:#34171c; color:#ffd7d7; margin-top:10px}
+    .stat{display:flex; align-items:center; gap:10px}
+    .stat .num{font-size:28px; font-weight:700}
+    /* Heat grid */
+    .heat{display:grid; grid-template-columns:repeat(7, 1fr); gap:6px}
+    .cell{height:16px; border-radius:4px; background:#15202e; border:1px solid #1e2c3d}
+    .c1{background:#173a2a}
+    .c2{background:#2a3b4f}
+    .c3{background:#5a3d3d}
+    .notice{font-size:12px; color:#b7c7db}
+    .consent{display:flex; gap:10px; align-items:flex-start; background:#111a25; padding:12px; border-radius:12px; border:1px solid #1e2c3d; margin-top:10px}
+    .hidden{display:none}
+    .divider{height:1px; background:#1f2a37; margin:10px 0}
+    .inline{display:inline-flex; gap:10px; flex-wrap:wrap}
+    .center{text-align:center}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap row">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <div class="tag">Prototype</div>
+          <div><strong>MindHaven</strong> — Student Mental Health Support</div>
+        </div>
+      </div>
+      <nav>
+        <a href="#student">Student App</a>
+        <a href="#assessment">Assessment</a>
+        <a href="#chat">Chatbot</a>
+        <a href="#coping">Coping Tools</a>
+        <a href="#dashboard">Counselor Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>Welcome</h1>
+    <p class="muted">This is a <em>clickable prototype</em> showing core flows: self-assessment, AI-style chat, coping plan suggestions, high-risk alerts, and a simple counselor view. Data is stored only in your browser (localStorage) for demo purposes.</p>
+    
+    <div class="consent" id="consentBox">
+      <div>
+        <strong>Consent & Safety Notice</strong>
+        <div class="tiny">This prototype is for demonstration only and does not provide medical advice. If you’re in immediate danger, contact local emergency services.</div>
+      </div>
+      <div class="right inline">
+        <button id="btnConsent" class="btn btn-accent">I Understand</button>
+      </div>
+    </div>
+
+    <div class="grid g-3" style="margin-top:16px">
+      <div class="card">
+        <h2>Quick Start</h2>
+        <ol class="muted">
+          <li>Go to <a href="#assessment">Assessment</a> and complete 7 questions (GAD-7).</li>
+          <li>View your <strong>risk level</strong> and suggested coping plan.</li>
+          <li>Try the <a href="#chat">Hani chatbot</a>. Type feelings like “stressed” or “hopeless”.</li>
+          <li>If high-risk is detected, a <span class="pill danger">crisis banner</span> appears with options.</li>
+          <li>Open the <a href="#dashboard">Counselor Dashboard</a> to see anonymized trends.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h2>Status</h2>
+        <div class="row">
+          <div class="stat"><div class="num" id="statScreened">0</div><div>screened</div></div>
+          <div class="stat"><div class="num" id="statAtRisk">0</div><div>flagged</div></div>
+          <div class="stat"><div class="num" id="statAppointments">0</div><div>appointments</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="notice">Counts are simulated from local demo data.</div>
+      </div>
+      <div class="card">
+        <h2>Privacy</h2>
+        <div class="muted">Local-only storage • Explicit opt-in • Minimal data • Crisis flow requires user confirmation</div>
+        <div class="divider"></div>
+        <div class="inline">
+          <span class="pill ok">Opt-in</span>
+          <span class="pill">LocalStorage</span>
+          <span class="pill warn">Demo Only</span>
+        </div>
+      </div>
+    </div>
+
+    <section id="student" style="margin-top:24px"></section>
+    <div class="grid g-2">
+      <div class="card" id="assessment">
+        <h2>Smart Self-Assessment (GAD-7)</h2>
+        <div class="muted">Over the last 2 weeks, how often have you been bothered by the following problems?</div>
+        <form id="gadForm">
+          <div class="q">
+            <div>1. Feeling nervous, anxious or on edge</div>
+            <div class="row">
+              <label><input class="radio" type="radio" name="q1" value="0" required> Not at all</label>
+              <label><input class="radio" type="radio" name="q1" value="1"> Several days</label>
+              <label><input class="radio" type="radio" name="q1" value="2"> More than half the days</label>
+              <label><input class="radio" type="radio" name="q1" value="3"> Nearly every day</label>
+            </div>
+          </div>
+          <div class="q">
+            <div>2. Not being able to stop or control worrying</div>
+            <div class="row">
+              <label><input class="radio" type="radio" name="q2" value="0" required> Not at all</label>
+              <label><input class="radio" type="radio" name="q2" value="1"> Several days</label>
+              <label><input class="radio" type="radio" name="q2" value="2"> More than half the days</label>
+              <label><input class="radio" type="radio" name="q2" value="3"> Nearly every day</label>
+            </div>
+          </div>
+          <div class="q">
+            <div>3. Worrying too much about different things</div>
+            <div class="row">
+              <label><input class="radio" type="radio" name="q3" value="0" required> Not at all</label>
+              <label><input class="radio" type="radio" name="q3" value="1"> Several days</label>
+              <label><input class="radio" type="radio" name="q3" value="2"> More than half the days</label>
+              <label><input class="radio" type="radio" name="q3" value="3"> Nearly every day</label>
+            </div>
+          </div>
+          <div class="q">
+            <div>4. Trouble relaxing</div>
+            <div class="row">
+              <label><input class="radio" type="radio" name="q4" value="0" required> Not at all</label>
+              <label><input class="radio" type="radio" name="q4" value="1"> Several days</label>
+              <label><input class="radio" type="radio" name="q4" value="2"> More than half the days</label>
+              <label><input class="radio" type="radio" name="q4" value="3"> Nearly every day</label>
+            </div>
+          </div>
+          <div class="q">
+            <div>5. Being so restless that it’s hard to sit still</div>
+            <div class="row">
+              <label><input class="radio" type="radio" name="q5" value="0" required> Not at all</label>
+              <label><input class="radio" type="radio" name="q5" value="1"> Several days</label>
+              <label><input class="radio" type="radio" name="q5" value="2"> More than half the days</label>
+              <label><input class="radio" type="radio" name="q5" value="3"> Nearly every day</label>
+            </div>
+          </div>
+          <div class="q">
+            <div>6. Becoming easily annoyed or irritable</div>
+            <div class="row">
+              <label><input class="radio" type="radio" name="q6" value="0" required> Not at all</label>
+              <label><input class="radio" type="radio" name="q6" value="1"> Several days</label>
+              <label><input class="radio" type="radio" name="q6" value="2"> More than half the days</label>
+              <label><input class="radio" type="radio" name="q6" value="3"> Nearly every day</label>
+            </div>
+          </div>
+          <div class="q">
+            <div>7. Feeling afraid as if something awful might happen</div>
+            <div class="row">
+              <label><input class="radio" type="radio" name="q7" value="0" required> Not at all</label>
+              <label><input class="radio" type="radio" name="q7" value="1"> Several days</label>
+              <label><input class="radio" type="radio" name="q7" value="2"> More than half the days</label>
+              <label><input class="radio" type="radio" name="q7" value="3"> Nearly every day</label>
+            </div>
+          </div>
+          <div class="flex-between">
+            <button type="reset" class="btn">Reset</button>
+            <button type="submit" class="btn btn-accent">Get Results</button>
+          </div>
+        </form>
+        <div id="resultBox" class="card" style="margin-top:12px; display:none">
+          <div class="flex-between">
+            <div><strong>Assessment Result</strong></div>
+            <div id="riskPill" class="pill">—</div>
+          </div>
+          <div style="margin-top:6px">
+            <div class="muted">Total score: <span id="scoreNum">0</span> / 21</div>
+            <div class="muted">Interpretation: <span id="scoreText">—</span></div>
+          </div>
+          <div class="divider"></div>
+          <div>
+            <strong>Suggested Coping Plan</strong>
+            <ul id="planList" class="muted"></ul>
+          </div>
+          <div class="divider"></div>
+          <div class="inline">
+            <button id="btnStartBreath" class="btn btn-ok">Start breathing exercise</button>
+            <button id="btnSchedule" class="btn">Auto-schedule counseling</button>
+            <button id="btnShareToDashboard" class="btn">Share (anonymized) to counselor dashboard</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="chat">
+        <h2>Confidential Chatbot — “Hani”</h2>
+        <div class="chat" id="chatBox" aria-live="polite"></div>
+        <div class="row" style="margin-top:8px">
+          <input id="chatInput" placeholder="Type how you're feeling…" style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid #233446; background:#0d1520; color:var(--text)"/>
+          <button id="chatSend" class="btn btn-accent">Send</button>
+        </div>
+        <div id="crisisBanner" class="crisis">
+          <strong>We’re here for you.</strong> Your words suggest you might be at risk. This prototype cannot provide medical care. Consider contacting your local emergency services or a trusted adult/counselor.
+          <div class="inline" style="margin-top:8px">
+            <button class="btn btn-danger" id="btnCrisisCall">Call emergency (demo)</button>
+            <button class="btn" id="btnCrisisChat">Message counselor (demo)</button>
+          </div>
+        </div>
+        <div class="footer">Hani offers supportive, non-clinical guidance only. In crises, it will direct you to human help.</div>
+      </div>
+    </div>
+
+    <div class="card" id="coping" style="margin-top:16px">
+      <h2>Coping Tools</h2>
+      <div class="grid g-3">
+        <div class="card">
+          <strong>Box Breathing (4-4-4-4)</strong>
+          <div class="muted">Inhale 4s • Hold 4s • Exhale 4s • Hold 4s</div>
+          <div class="divider"></div>
+          <div class="center" id="breathStatus">Press Start</div>
+          <div class="center" style="margin-top:8px"><button id="btnBreathStart2" class="btn btn-ok">Start</button> <button id="btnBreathStop2" class="btn btn-danger">Stop</button></div>
+        </div>
+        <div class="card">
+          <strong>CBT Journal Prompts</strong>
+          <ol class="muted" id="journalList">
+            <li>What happened? (facts)</li>
+            <li>What thoughts came up?</li>
+            <li>What evidence supports / challenges those thoughts?</li>
+            <li>What’s a kinder alternative thought?</li>
+            <li>One small action I can take today is…</li>
+          </ol>
+        </div>
+        <div class="card">
+          <strong>Grounding 5-4-3-2-1</strong>
+          <div class="muted">5 things you can see • 4 you can feel • 3 you can hear • 2 you can smell • 1 you can taste</div>
+          <div class="divider"></div>
+          <button class="btn" id="btnGrounded">Mark as Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="dashboard" style="margin-top:16px">
+      <h2>Counselor Dashboard (Demo)</h2>
+      <div class="row">
+        <div class="card" style="flex:1">
+          <div class="muted">Anonymized weekly mood heatmap</div>
+          <div class="heat" id="heatGrid"></div>
+          <div class="tiny">Darker = higher concern</div>
+        </div>
+        <div class="card" style="width:360px">
+          <div><strong>Notifications</strong></div>
+          <ul id="notifList" class="muted"></ul>
+          <div class="divider"></div>
+          <div class="tiny">Demo logic: high GAD-7 or crisis keywords trigger a notification.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Prepared for demo purposes. © MindHaven Prototype
+    </div>
+  </main>
+
+<script>
+(function(){
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  const store = {
+    get(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback }catch(e){ return fallback }},
+    set(key, val){ localStorage.setItem(key, JSON.stringify(val)) },
+  };
+
+  // Consent
+  const consented = store.get('consent', false);
+  const consentBox = $('#consentBox');
+  if(consented){ consentBox.classList.add('hidden'); }
+  $('#btnConsent').onclick = ()=>{ store.set('consent', true); consentBox.classList.add('hidden'); };
+
+  // Stats
+  function refreshStats(){
+    const assessments = store.get('assessments', []);
+    const atRisk = assessments.filter(a => a.level === 'Moderate' || a.level === 'Severe').length;
+    const appts = store.get('appointments', []).length;
+    $('#statScreened').textContent = assessments.length;
+    $('#statAtRisk').textContent = atRisk;
+    $('#statAppointments').textContent = appts;
+  }
+  refreshStats();
+
+  // Heat grid (7 columns x 10 rows for demo)
+  function drawHeat(){
+    const grid = $('#heatGrid');
+    grid.innerHTML = '';
+    const assessments = store.get('assessments', []);
+    const last = assessments.slice(-70); // up to last 70 results
+    for(let i=0;i<70;i++){
+      const div = document.createElement('div');
+      div.className = 'cell';
+      const a = last[i];
+      if(a){
+        if(a.level === 'Severe') div.classList.add('c3');
+        else if(a.level === 'Moderate') div.classList.add('c2');
+        else if(a.level === 'Mild') div.classList.add('c1');
+      }
+      grid.appendChild(div);
+    }
+  }
+  drawHeat();
+
+  // GAD-7 thresholds
+  function interpret(score){
+    if(score <= 4) return {level:'Minimal', cls:'ok', text:'Minimal anxiety'};
+    if(score <= 9) return {level:'Mild', cls:'', text:'Mild anxiety'};
+    if(score <= 14) return {level:'Moderate', cls:'warn', text:'Moderate anxiety — consider speaking with a counselor.'};
+    return {level:'Severe', cls:'danger', text:'Severe anxiety — we recommend professional support.'};
+  }
+
+  function planFor(level){
+    const base = [
+      'Try box breathing for 3 minutes',
+      'Use the grounding 5-4-3-2-1 exercise',
+      'Write a short CBT journal entry',
+    ];
+    const moderatePlus = [
+      'Consider reaching out to a campus counselor',
+      'Set a small daily routine (sleep / meals / walk)',
+    ];
+    const severePlus = [
+      'If you feel unsafe, contact emergency services',
+      'Ask a trusted person to check in with you today',
+    ];
+    if(level==='Minimal') return base.slice(0,2);
+    if(level==='Mild') return base;
+    if(level==='Moderate') return base.concat(moderatePlus);
+    return base.concat(moderatePlus).concat(severePlus);
+  }
+
+  $('#gadForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const vals = [1,2,3,4,5,6,7].map(i => parseInt((new FormData(e.target)).get('q'+i) || '0',10));
+    const score = vals.reduce((a,b)=>a+b,0);
+    const info = interpret(score);
+    $('#resultBox').style.display = 'block';
+    const pill = $('#riskPill');
+    pill.className = 'pill ' + (info.cls || '');
+    pill.textContent = info.level;
+    $('#scoreNum').textContent = score;
+    $('#scoreText').textContent = info.text;
+
+    const planUl = $('#planList'); planUl.innerHTML = '';
+    planFor(info.level).forEach(s=>{
+      const li = document.createElement('li'); li.textContent = s; planUl.appendChild(li);
+    });
+
+    // Save anonymized result
+    const assessments = store.get('assessments', []);
+    assessments.push({when: Date.now(), score, level: info.level});
+    store.set('assessments', assessments);
+    refreshStats(); drawHeat();
+
+    // Notify counselor if high risk
+    if(info.level==='Moderate' || info.level==='Severe'){
+      pushNotif('High-risk screening result received (anonymized).');
+    }
+  });
+
+  $('#btnStartBreath').onclick = ()=> startBreathing();
+
+  // Auto-schedule counseling (demo)
+  $('#btnSchedule').onclick = ()=>{
+    const when = new Date(Date.now() + 1000*60*60*24*2); // +2 days
+    const appts = store.get('appointments', []);
+    appts.push({when: when.toISOString()});
+    store.set('appointments', appts);
+    refreshStats();
+    alert('Counseling appointment auto-scheduled for ' + when.toLocaleString());
+    pushNotif('Counseling appointment auto-scheduled (student-initiated).');
+  };
+
+  // Share to dashboard (demo)
+  $('#btnShareToDashboard').onclick = ()=>{
+    pushNotif('New anonymized assessment shared to dashboard.');
+    alert('Shared (anonymized) with counselor dashboard.');
+  };
+
+  // Chatbot
+  const chatBox = $('#chatBox');
+  function addMsg(who, text){
+    const row = document.createElement('div');
+    row.className = 'msg ' + (who==='me' ? 'me' : 'bot');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    chatBox.appendChild(row);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  const crisisWords = ['suicide','kill myself','end my life','self harm','self-harm','hopeless','worthless','can\'t go on','cant go on','die'];
+  function detectCrisis(txt){
+    const s = txt.toLowerCase();
+    return crisisWords.some(w=> s.includes(w));
+  }
+
+  function botReply(user){
+    const s = user.toLowerCase();
+    if(detectCrisis(s)){
+      $('#crisisBanner').style.display = 'block';
+      pushNotif('Possible crisis language detected — counselor outreach suggested.');
+      return "I’m really sorry you’re feeling this way. You deserve support. This prototype can’t provide medical care, but you’re not alone. Consider contacting local emergency services or a trusted counselor right now.";
+    }
+    if(s.includes('stressed') || s.includes('anxious') || s.includes('panic')){
+      return "Thanks for sharing. Let’s try a 60-second box breathing together: inhale 4s, hold 4s, exhale 4s, hold 4s. I can start a timer if you’d like.";
+    }
+    if(s.includes('sleep') || s.includes('insomnia')){
+      return "Sleep can be tough when anxiety is high. A consistent wind-down routine and limiting screens 1 hour before bed may help. Want a short plan?";
+    }
+    if(s.includes('assignment') || s.includes('deadline') || s.includes('study')){
+      return "Deadlines can feel overwhelming. Break it down: (1) the next 15-minute step, (2) one email for clarification, (3) one short break. Should I create a mini plan?";
+    }
+    return "I’m listening. Tell me more about what’s been hardest lately. If at any point you feel unsafe, please reach out to emergency services or a trusted adult.";
+  }
+
+  function pushNotif(text){
+    const notifs = store.get('notifs', []);
+    notifs.unshift({when: Date.now(), text});
+    store.set('notifs', notifs);
+    renderNotifs();
+  }
+
+  function renderNotifs(){
+    const ul = $('#notifList'); ul.innerHTML = '';
+    const notifs = store.get('notifs', []);
+    notifs.slice(0,8).forEach(n=>{
+      const li = document.createElement('li');
+      const d = new Date(n.when);
+      li.textContent = d.toLocaleString() + ' — ' + n.text;
+      ul.appendChild(li);
+    });
+  }
+  renderNotifs();
+
+  $('#chatSend').onclick = ()=>{
+    const v = $('#chatInput').value.trim();
+    if(!v) return;
+    addMsg('me', v);
+    $('#chatInput').value='';
+    const reply = botReply(v);
+    setTimeout(()=> addMsg('bot', reply), 300);
+  };
+
+  // Crisis buttons (demo)
+  $('#btnCrisisCall').onclick = ()=> alert('Demo: This would open the phone dialer to local emergency services.');
+  $('#btnCrisisChat').onclick = ()=> { pushNotif('Student requested counselor chat (demo).'); alert('Demo: Counselor has been notified to start a chat.'); };
+
+  // Breathing exercise
+  let breathTimer=null, step=0, steps=['Inhale','Hold','Exhale','Hold'], durations=[4,4,4,4];
+  function startBreathing(){
+    stopBreathing();
+    $('#breathStatus').textContent = 'Starting…';
+    step = 0;
+    breathTimer = setInterval(()=>{
+      const action = steps[step % steps.length];
+      $('#breathStatus').textContent = action + '…';
+      step++;
+    }, 1000 * durations[0]); // simple 4s per step
+  }
+  function stopBreathing(){
+    if(breathTimer) clearInterval(breathTimer);
+    breathTimer = null;
+    $('#breathStatus').textContent = 'Stopped';
+  }
+  $('#btnBreathStart2').onclick = startBreathing;
+  $('#btnBreathStop2').onclick = stopBreathing;
+
+})();</script>
+</body>
+</html>
